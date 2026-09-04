@@ -1,0 +1,11 @@
+{
+  "usr_admin_1788341518633": {
+    "id": "usr_admin_1788341518633",
+    "email": "admin@example.com",
+    "passwordHash": "018032ca06cc1387245d2969652515c5df93e4af77ab37b3a98099ba66f21fc7",
+    "name": "Administrator",
+    "role": "admin",
+    "createdAt": "2026-09-02T09:31:58.633Z",
+    "lastActive": "2026-09-02T09:31:58.634Z"
+  }
+}

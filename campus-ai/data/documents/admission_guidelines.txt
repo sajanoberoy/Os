@@ -1,0 +1,29 @@
+# Campus AI — University Admission Guidelines & Verification Protocols
+Document: admission_guidelines.txt
+Category: Official University Policy
+Authority: Directorate of Admissions & Academic Records
+
+==================================================
+SECTION 1: PHYSICAL DOCUMENT VERIFICATION
+[Page 4]
+1.1 Verification Venue & Schedule
+All newly admitted undergraduate and postgraduate students must complete mandatory physical document verification before course enrollment is finalized.
+- Venue: Central Academic Complex, Multi-Purpose Hall (Ground Floor, Wing C).
+- Verification Window: Monday through Friday, 09:00 AM to 04:00 PM (Lunch break: 01:00 PM to 02:00 PM).
+
+[Page 5]
+1.2 Mandatory Document Checklist
+Candidates must present original copies along with three (3) sets of self-attested photocopies of the following credentials:
+1. University Provisional Admission Letter / Offer Slip
+2. High School (10th Standard) Certificate and Marksheet (for Date of Birth verification)
+3. Higher Secondary (12th Standard / Pre-University) Marksheet and Passing Certificate
+4. Transfer Certificate (TC) and Conduct/Character Certificate from the previous institution
+5. Official Migration Certificate (for students from other boards or universities)
+6. Category/Reservation Certificate (if applicable: SC/ST/OBC/EWS/Disability)
+7. Four (4) recent passport-sized color photographs with white background
+8. Government-issued photo identification (Passport, National ID, or Driver's License)
+9. Official University Tuition Fee Payment Challan/Receipt
+
+[Page 6]
+1.3 Provisional Approval & Deficiencies
+If any non-critical certificate (such as Migration Certificate) is pending at the time of verification, candidate may submit an Undertaking Form (Form A-3) granting a conditional grace period of fourteen (14) days to produce the original certificate.

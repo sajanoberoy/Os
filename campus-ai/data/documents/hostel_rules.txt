@@ -1,0 +1,23 @@
+# Campus AI — Residential Life & Hostel Allocation Regulations
+Document: hostel_rules.txt
+Category: Official University Policy
+Authority: Council of Wardens & Chief Warden Office
+
+==================================================
+SECTION 1: HOSTEL ROOM ALLOCATION & CHECK-IN
+[Page 5]
+1.1 Room Allocation Protocol
+Hostel room allotment is conducted on the basis of academic year, program, and distance of home residence.
+- Eligible students receive an official Allotment Letter via email.
+- Physical key handover and room inventory verification takes place at the respective Hostel Caretaker's Office (Ground Floor of each Residence Block).
+- Students must present their Hostel Fee Receipt, 2 passport photos, and Signed Code of Conduct Agreement at the time of key collection.
+
+[Page 6]
+1.2 Curfew, Gate Timings & Visitor Policies
+- Residential students must return to their respective hostel premises by 09:30 PM on weekdays and 10:00 PM on weekends.
+- Late entry requires logging the reason in the biometric register and obtaining the resident assistant or assistant warden's counter-signature.
+- Outside guests are permitted in common recreation areas between 04:00 PM and 07:30 PM only and are strictly forbidden inside residential rooms.
+
+[Page 7]
+1.3 Maintenance Grievance & Facilities
+All electrical, plumbing, or internet Wi-Fi issues must be reported through the online Hostel Maintenance Management Portal or logged in the physical complaint register located at the Warden's Desk. Emergency maintenance is handled 24/7 by the resident caretaker.

@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "Document": {
+      "title": "Document",
+      "description": "Campus policy, regulations, and official knowledge base document",
+      "type": "object",
+      "properties": {
+        "filename": { "type": "string" },
+        "content": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "uploadedBy": { "type": "string" }
+      },
+      "required": ["filename", "content"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Registered campus student, demo user, or administrator account",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "passwordHash": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "admin", "demo"] },
+        "verified": { "type": "boolean" },
+        "verificationCode": { "type": "string" },
+        "verificationCodeExpires": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "lastActive": { "type": "string" },
+        "ipAddress": { "type": "string" },
+        "userAgent": { "type": "string" },
+        "questionsCount": { "type": "number" }
+      },
+      "required": ["id", "email", "passwordHash", "name", "role"]
+    },
+    "Test": {
+      "title": "Test",
+      "description": "Firestore connection validation test document",
+      "type": "object",
+      "properties": {
+        "connected": { "type": "boolean" },
+        "timestamp": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/documents/{documentId}": {
+      "schema": "Document",
+      "description": "Official campus handbook and policy documents"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile accounts, credentials, and activity counts"
+    },
+    "/test/{testId}": {
+      "schema": "Test",
+      "description": "Connection test records"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Campus AI",
+  "description": "Your university, explained. AI-powered campus assistant providing accurate, grounded answers from official university policies, guidelines, and handbooks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

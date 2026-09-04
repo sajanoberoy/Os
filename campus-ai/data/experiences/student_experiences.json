@@ -1,0 +1,72 @@
+[
+  {
+    "id": "exp_001",
+    "topic": "Lost ID Card",
+    "question": "I lost my university ID card. What should I do?",
+    "experience": "Don't panic! The quickest practical route is to visit the Student Affairs Helpdesk in Admin Block A, Room 104 between 10:00 AM and 1:00 PM. First, ask the front desk officer for an emergency Temporary Gate Slip so campus security won't stop you at the gates or library. Then pay the fee at Cashier Window 2—card payment is much faster than cash. Pro-tip from seniors: Keep a clear photo of your ID card barcode on your phone; security and the library scanner will often accept that for the day!",
+    "tags": ["id card", "lost id", "replacement", "admin block", "temporary pass"],
+    "source": "Student Community Reports — Campus Experience Network",
+    "type": "experience",
+    "verifiedBySeniors": true
+  },
+  {
+    "id": "exp_002",
+    "topic": "Document Verification Venue & Queue",
+    "question": "Where do students usually go for document verification?",
+    "experience": "While the official venue is the Multi-Purpose Hall in Wing C, the line gets super long by 10:00 AM. Seniors strongly advise reaching by 8:15 AM to collect a token number from Counter 1. The document verification desks are arranged alphabetically by department (A-F, G-M, N-Z), so check the big whiteboards at the hall entrance before standing in the general line.",
+    "tags": ["document verification", "verification venue", "token", "hall c", "line"],
+    "source": "Student Community Reports — Campus Experience Network",
+    "type": "experience",
+    "verifiedBySeniors": true
+  },
+  {
+    "id": "exp_003",
+    "topic": "Document Verification Preparation",
+    "question": "What should I carry for document verification?",
+    "experience": "Bring at least 4 passport-size photographs and 3 extra photocopies of every certificate in a clean transparent folder. Crucial tip: Bring your own blue ink pen, stapler, and glue stick! The stationery stall inside the campus is a 10-minute walk away across the grounds and usually has a massive queue on verification days.",
+    "tags": ["carry", "checklist", "stationery", "photocopies", "photos"],
+    "source": "Student Community Reports — Campus Experience Network",
+    "type": "experience",
+    "verifiedBySeniors": true
+  },
+  {
+    "id": "exp_004",
+    "topic": "Missed Deadlines & Registration Overrides",
+    "question": "I missed a deadline. Who should I contact?",
+    "experience": "Avoid sending an email to the general university helpdesk email because they take 3 to 5 business days to reply during registration week. Instead, go straight in person to your Department Secretary or your designated Faculty Advisor at 9:30 AM with a handwritten, signed request letter explaining your reason. They have administrative override access and can sign Form AC-10 on the spot.",
+    "tags": ["missed deadline", "late registration", "advisor", "override", "hod"],
+    "source": "Student Community Reports — Campus Experience Network",
+    "type": "experience",
+    "verifiedBySeniors": true
+  },
+  {
+    "id": "exp_005",
+    "topic": "Hostel Allocation & Move-In",
+    "question": "How do I get my hostel allocation?",
+    "experience": "Room keys are handed out by the Ground Floor Caretaker in each residence block. The fastest move-in is between 11:00 AM and 2:00 PM when lines thin out. Tip from seniors: If you have an option, ask for a 2nd or 3rd floor room (ground floor gets noisy near the entry lobby). Bring a 3-pin extension cord and a mattress topper because room outlets are often far from the study desk.",
+    "tags": ["hostel", "room allocation", "keys", "caretaker", "move-in"],
+    "source": "Student Community Reports — Campus Experience Network",
+    "type": "experience",
+    "verifiedBySeniors": true
+  },
+  {
+    "id": "exp_006",
+    "topic": "Campus Entry without ID",
+    "question": "What happens if I don't have my ID card yet?",
+    "experience": "If your physical ID isn't issued yet (freshers or lost cards), show your digital Provisional Admission Letter or fee receipt on your smartphone along with any government ID (driver's license or passport) at Main Gate 2. The security team maintains a Visitor Entry Register and will let you in immediately without any hassle.",
+    "tags": ["no id card", "entry", "gate pass", "security", "provisional"],
+    "source": "Student Community Reports — Campus Experience Network",
+    "type": "experience",
+    "verifiedBySeniors": true
+  },
+  {
+    "id": "exp_007",
+    "topic": "Submitting Documents & Forms",
+    "question": "Where can I submit my documents?",
+    "experience": "For immediate peace of mind, do not use the physical drop-box outside the admissions office (it gets cleared only once every 48 hours). Instead, hand your documents directly to the desk officer at Window 3 (Student Affairs) and ask them to stamp your duplicate copy with an official 'Received' date stamp as your proof of submission.",
+    "tags": ["submit documents", "window 3", "acknowledgement stamp", "proof"],
+    "source": "Student Community Reports — Campus Experience Network",
+    "type": "experience",
+    "verifiedBySeniors": true
+  }
+]

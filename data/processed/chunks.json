@@ -1,0 +1,114 @@
+[
+  {
+    "id": "Antiragging_txt_chunk_0",
+    "title": "ANTIRAGGING",
+    "source": "Antiragging.txt",
+    "pageOrSection": "Section 1",
+    "type": "official",
+    "content": "Any form of ragging is strictly forbidden. Students caught ragging will face suspension and possible police action."
+  },
+  {
+    "id": "Founders_txt_chunk_0",
+    "title": "FOUNDERS",
+    "source": "Founders.txt",
+    "pageOrSection": "Section 1",
+    "type": "official",
+    "content": "The campus was founded in 1955 by a trust focused on advancing technical education."
+  },
+  {
+    "id": "Knowledge_base_txt_chunk_0",
+    "title": "KNOWLEDGE BASE",
+    "source": "Knowledge_base.txt",
+    "pageOrSection": "Section 1",
+    "type": "official",
+    "content": "This is the central knowledge base document for Campus AI. It contains important instructions."
+  },
+  {
+    "id": "Knowledge_base_txt_chunk_1",
+    "title": "KNOWLEDGE BASE",
+    "source": "Knowledge_base.txt",
+    "pageOrSection": "Section 2",
+    "type": "official",
+    "content": "1. Students should refer to the official handbook for academic policies."
+  },
+  {
+    "id": "Knowledge_base_txt_chunk_2",
+    "title": "KNOWLEDGE BASE",
+    "source": "Knowledge_base.txt",
+    "pageOrSection": "Section 3",
+    "type": "official",
+    "content": "3. Midterm exams are scheduled for the 8th week of the semester."
+  },
+  {
+    "id": "Regulations_txt_chunk_0",
+    "title": "REGULATIONS",
+    "source": "Regulations.txt",
+    "pageOrSection": "Section 1",
+    "type": "official",
+    "content": "2. Ragging is strictly prohibited and punishable by law."
+  },
+  {
+    "id": "Regulations_txt_chunk_1",
+    "title": "REGULATIONS",
+    "source": "Regulations.txt",
+    "pageOrSection": "Section 2",
+    "type": "official",
+    "content": "3. Plagiarism in assignments will result in immediate failure."
+  },
+  {
+    "id": "exp_001",
+    "title": "Lost ID Card",
+    "source": "Student Community Reports — Campus Experience Network",
+    "pageOrSection": "Student Experience Dataset",
+    "type": "experience",
+    "content": "Experience: Don't panic! The quickest practical route is to visit the Student Affairs Helpdesk in Admin Block A, Room 104 between 10:00 AM and 1:00 PM. First, ask the front desk officer for an emergency Temporary Gate Slip so campus security won't stop you at the gates or library. Then pay the fee at Cashier Window 2—card payment is much faster than cash. Pro-tip from seniors: Keep a clear photo of your ID card barcode on your phone; security and the library scanner will often accept that for the day!\nQuestion: I lost my university ID card. What should I do?"
+  },
+  {
+    "id": "exp_002",
+    "title": "Document Verification Venue & Queue",
+    "source": "Student Community Reports — Campus Experience Network",
+    "pageOrSection": "Student Experience Dataset",
+    "type": "experience",
+    "content": "Experience: While the official venue is the Multi-Purpose Hall in Wing C, the line gets super long by 10:00 AM. Seniors strongly advise reaching by 8:15 AM to collect a token number from Counter 1. The document verification desks are arranged alphabetically by department (A-F, G-M, N-Z), so check the big whiteboards at the hall entrance before standing in the general line.\nQuestion: Where do students usually go for document verification?"
+  },
+  {
+    "id": "exp_003",
+    "title": "Document Verification Preparation",
+    "source": "Student Community Reports — Campus Experience Network",
+    "pageOrSection": "Student Experience Dataset",
+    "type": "experience",
+    "content": "Experience: Bring at least 4 passport-size photographs and 3 extra photocopies of every certificate in a clean transparent folder. Crucial tip: Bring your own blue ink pen, stapler, and glue stick! The stationery stall inside the campus is a 10-minute walk away across the grounds and usually has a massive queue on verification days.\nQuestion: What should I carry for document verification?"
+  },
+  {
+    "id": "exp_004",
+    "title": "Missed Deadlines & Registration Overrides",
+    "source": "Student Community Reports — Campus Experience Network",
+    "pageOrSection": "Student Experience Dataset",
+    "type": "experience",
+    "content": "Experience: Avoid sending an email to the general university helpdesk email because they take 3 to 5 business days to reply during registration week. Instead, go straight in person to your Department Secretary or your designated Faculty Advisor at 9:30 AM with a handwritten, signed request letter explaining your reason. They have administrative override access and can sign Form AC-10 on the spot.\nQuestion: I missed a deadline. Who should I contact?"
+  },
+  {
+    "id": "exp_005",
+    "title": "Hostel Allocation & Move-In",
+    "source": "Student Community Reports — Campus Experience Network",
+    "pageOrSection": "Student Experience Dataset",
+    "type": "experience",
+    "content": "Experience: Room keys are handed out by the Ground Floor Caretaker in each residence block. The fastest move-in is between 11:00 AM and 2:00 PM when lines thin out. Tip from seniors: If you have an option, ask for a 2nd or 3rd floor room (ground floor gets noisy near the entry lobby). Bring a 3-pin extension cord and a mattress topper because room outlets are often far from the study desk.\nQuestion: How do I get my hostel allocation?"
+  },
+  {
+    "id": "exp_006",
+    "title": "Campus Entry without ID",
+    "source": "Student Community Reports — Campus Experience Network",
+    "pageOrSection": "Student Experience Dataset",
+    "type": "experience",
+    "content": "Experience: If your physical ID isn't issued yet (freshers or lost cards), show your digital Provisional Admission Letter or fee receipt on your smartphone along with any government ID (driver's license or passport) at Main Gate 2. The security team maintains a Visitor Entry Register and will let you in immediately without any hassle.\nQuestion: What happens if I don't have my ID card yet?"
+  },
+  {
+    "id": "exp_007",
+    "title": "Submitting Documents & Forms",
+    "source": "Student Community Reports — Campus Experience Network",
+    "pageOrSection": "Student Experience Dataset",
+    "type": "experience",
+    "content": "Experience: For immediate peace of mind, do not use the physical drop-box outside the admissions office (it gets cleared only once every 48 hours). Instead, hand your documents directly to the desk officer at Window 3 (Student Affairs) and ask them to stamp your duplicate copy with an official 'Received' date stamp as your proof of submission.\nQuestion: Where can I submit my documents?"
+  }
+]
