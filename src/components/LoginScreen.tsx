@@ -293,7 +293,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 type="submit"
                 disabled={isLoading}
                 className={`w-full mt-2 text-white font-semibold py-2.5 px-4 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-70 shadow-sm cursor-pointer ${
-                  selectedRole === 'admin' ? 'bg-slate-900 hover:bg-slate-800' : 'bg-blue-600 hover:bg-blue-700'
+                  selectedRole === 'admin' ? 'bg-slate-900 hover:bg-slate-800 border border-transparent' : 'bg-blue-600 hover:bg-blue-700'
                 }`}
               >
                 <span>

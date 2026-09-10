@@ -36,7 +36,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message, onViewSource 
       <div className="flex-1 max-w-[90%] space-y-3">
         {/* Main Grounded Chat Bubble with Markdown formatting */}
         <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-xs p-4 shadow-2xs text-slate-800 text-sm leading-relaxed">
-          <div className="prose prose-sm prose-slate max-w-none space-y-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_strong]:text-slate-900 [&_strong]:font-semibold">
+          <div className="-sm-slate max-w-none space-y-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_strong]:text-slate-900 [&_strong]:font-semibold">
             <Markdown>{displayText}</Markdown>
           </div>
         </div>

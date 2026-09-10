@@ -1,11 +1,73 @@
 {
-  "usr_admin_1788341518633": {
-    "id": "usr_admin_1788341518633",
-    "email": "admin@example.com",
+  "usr_1788456995567_4fa83253": {
     "passwordHash": "018032ca06cc1387245d2969652515c5df93e4af77ab37b3a98099ba66f21fc7",
+    "id": "usr_1788456995567_4fa83253",
+    "createdAt": "2026-09-03T17:36:35.567Z",
+    "role": "student",
+    "verificationCodeExpires": null,
+    "lastActive": "2026-09-03T17:36:57.641Z",
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36",
+    "verificationCode": null,
+    "ipAddress": "2409:40e4:1041:66fc:cc06:6aff:fe44:9df3",
+    "email": "dakawif849@fanzher.com",
+    "verified": true,
+    "name": "Spider Kash",
+    "questionsCount": 0
+  },
+  "usr_1788457128938_d7802d4c": {
+    "name": "Jaffrey Dustbin",
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36",
+    "verificationCode": null,
+    "id": "usr_1788457128938_d7802d4c",
+    "lastActive": "2026-09-03T17:39:08.697Z",
+    "questionsCount": 0,
+    "ipAddress": "2409:40e5:7:5786:49a:7aff:fef1:81",
+    "email": "cojoxo4559@fanzher.com",
+    "role": "student",
+    "verified": true,
+    "passwordHash": "018032ca06cc1387245d2969652515c5df93e4af77ab37b3a98099ba66f21fc7",
+    "verificationCodeExpires": null,
+    "createdAt": "2026-09-03T17:38:48.938Z"
+  },
+  "usr_1788457298733_f8a5b804": {
+    "passwordHash": "018032ca06cc1387245d2969652515c5df93e4af77ab37b3a98099ba66f21fc7",
+    "lastActive": "2026-09-03T17:42:09.844Z",
+    "questionsCount": 0,
+    "name": "Mohandas Karamchand Gandhi",
+    "createdAt": "2026-09-03T17:41:38.733Z",
+    "verified": true,
+    "verificationCodeExpires": null,
+    "verificationCode": null,
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36",
+    "email": "vedoli7282@fanzher.com",
+    "role": "student",
+    "ipAddress": "2409:40e5:7:5786:49a:7aff:fef1:81",
+    "id": "usr_1788457298733_f8a5b804"
+  },
+  "usr_1788457404394_d3f50856": {
+    "lastActive": "2026-09-03T17:43:43.872Z",
+    "ipAddress": "2409:40e5:7:5786:49a:7aff:fef1:81",
+    "verified": true,
+    "verificationCodeExpires": null,
+    "userAgent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36",
+    "role": "student",
+    "passwordHash": "018032ca06cc1387245d2969652515c5df93e4af77ab37b3a98099ba66f21fc7",
+    "verificationCode": null,
+    "createdAt": "2026-09-03T17:43:24.394Z",
+    "id": "usr_1788457404394_d3f50856",
+    "questionsCount": 0,
+    "email": "layow26829@dd2car.com",
+    "name": "Nathuram Godse"
+  },
+  "usr_admin_1788371079623": {
+    "id": "usr_admin_1788371079623",
+    "lastActive": "2026-09-04T07:10:28.742Z",
+    "email": "admin@example.com",
+    "userAgent": "node",
+    "passwordHash": "018032ca06cc1387245d2969652515c5df93e4af77ab37b3a98099ba66f21fc7",
+    "ipAddress": "127.0.0.1",
+    "createdAt": "2026-09-02T17:44:39.623Z",
     "name": "Administrator",
-    "role": "admin",
-    "createdAt": "2026-09-02T09:31:58.633Z",
-    "lastActive": "2026-09-02T09:31:58.634Z"
+    "role": "admin"
   }
 }

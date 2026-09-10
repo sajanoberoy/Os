@@ -63,22 +63,8 @@ export class RAGIndexer {
   public async initialize(): Promise<void> {
     if (this.isInitialized) return;
     
-    if (fs.existsSync(CHUNKS_FILE) && fs.existsSync(EMBEDDINGS_FILE)) {
-      try {
-        const rawChunks = fs.readFileSync(CHUNKS_FILE, 'utf-8');
-        const rawEmbeds = fs.readFileSync(EMBEDDINGS_FILE, 'utf-8');
-        this.chunks = JSON.parse(rawChunks);
-        const embedData = JSON.parse(rawEmbeds);
-        this.embeddings = embedData.embeddings || [];
-        this.vocabulary = embedData.vocabulary || [];
-        this.isInitialized = true;
-        console.log(`[RAG Indexer] Loaded ${this.chunks.length} cached chunks and ${this.embeddings.length} embeddings.`);
-        return;
-      } catch (err) {
-        console.warn('[RAG Indexer] Error reading cached index, rebuilding...', err);
-      }
-    }
-
+    // Always reindex from Firestore on startup to ensure we have the latest documents.
+    // If Firestore fails, reindexAll() will gracefully fallback to local files.
     await this.reindexAll();
   }
 

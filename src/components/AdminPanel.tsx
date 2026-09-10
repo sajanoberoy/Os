@@ -535,7 +535,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         {activeTab === 'documents' ? (
           <>
             {/* Section 1: Top Controls & Search */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h2 className="text-base font-bold text-slate-900 tracking-tight">
@@ -561,23 +561,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </div>
 
               {/* Search bar */}
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
-                <Search className="w-4 h-4 text-slate-400 shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter source documents by title, filename, or keywords..."
-                  className="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400 font-normal"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="text-xs text-slate-400 hover:text-slate-600"
-                  >
-                    Clear
-                  </button>
-                )}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm">
+                  <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Filter source documents by title, filename, or keywords..."
+                    className="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400 font-normal focus:ring-0"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => {}}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Search</span>
+                </button>
               </div>
             </div>
 
@@ -817,20 +826,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
               </div>
 
               {/* Filter controls */}
-              <div className="px-5 py-3.5 bg-slate-50/50 border-b border-slate-100 flex items-center gap-2">
-                <Search className="w-4 h-4 text-slate-400 shrink-0" />
-                <input
-                  type="text"
-                  value={studentsSearchQuery}
-                  onChange={(e) => setStudentsSearchQuery(e.target.value)}
-                  placeholder="Search students by name, email, IP address, OS, browser..."
-                  className="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400 font-normal focus:ring-0"
-                />
-                {studentsSearchQuery && (
-                  <button onClick={() => setStudentsSearchQuery('')} className="text-xs text-slate-400 hover:text-slate-600">
-                    Clear
-                  </button>
-                )}
+              <div className="px-5 py-3 bg-slate-50/50 border-b border-slate-100 flex items-center gap-3">
+                <div className="flex-1 flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3.5 py-2 shadow-2xs">
+                  <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={studentsSearchQuery}
+                    onChange={(e) => setStudentsSearchQuery(e.target.value)}
+                    placeholder="Search users by name or email address..."
+                    className="w-full bg-transparent border-none outline-none text-xs text-slate-800 placeholder:text-slate-400 font-normal focus:ring-0"
+                  />
+                  {studentsSearchQuery && (
+                    <button onClick={() => setStudentsSearchQuery('')} className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer">
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => {}}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Search</span>
+                </button>
               </div>
 
               {/* Directory Content */}

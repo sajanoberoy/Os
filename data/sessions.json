@@ -1,0 +1,42 @@
+{
+  "a572eb1f7e2cf3dede4e83bf543986103490ac8a77926d1926ce104023bc2cf5": {
+    "userId": "usr_admin_1788371079623",
+    "email": "admin@example.com",
+    "role": "admin",
+    "name": "Administrator",
+    "token": "a572eb1f7e2cf3dede4e83bf543986103490ac8a77926d1926ce104023bc2cf5",
+    "createdAt": 1788504604326
+  },
+  "60c2951aa2ed5e635864b5943faa9c793f6f8ae81de812081d82006fe2684106": {
+    "userId": "usr_admin_1788371079623",
+    "email": "admin@example.com",
+    "role": "admin",
+    "name": "Administrator",
+    "token": "60c2951aa2ed5e635864b5943faa9c793f6f8ae81de812081d82006fe2684106",
+    "createdAt": 1788505620758
+  },
+  "3267e735d2c93a3a63dc2ed7b5c2ff3402c13891956795cfe832dfacf5615585": {
+    "userId": "usr_admin_1788371079623",
+    "email": "admin@example.com",
+    "role": "admin",
+    "name": "Administrator",
+    "token": "3267e735d2c93a3a63dc2ed7b5c2ff3402c13891956795cfe832dfacf5615585",
+    "createdAt": 1788505787343
+  },
+  "42bd2a95d0a6d916336741f2af6cf9303beec8a023b52d34a0de1868496289d3": {
+    "userId": "usr_admin_1788371079623",
+    "email": "admin@example.com",
+    "role": "admin",
+    "name": "Administrator",
+    "token": "42bd2a95d0a6d916336741f2af6cf9303beec8a023b52d34a0de1868496289d3",
+    "createdAt": 1788505828700
+  },
+  "fcf89a5d54e9f7af752d72d22b01592956c7e50d7ee1ad8eb9b04f2b84fe4278": {
+    "userId": "usr_admin_1788371079623",
+    "email": "admin@example.com",
+    "role": "admin",
+    "name": "Administrator",
+    "token": "fcf89a5d54e9f7af752d72d22b01592956c7e50d7ee1ad8eb9b04f2b84fe4278",
+    "createdAt": 1788505885223
+  }
+}
