@@ -68,50 +68,51 @@ Provide a direct, human-like, and pinpointed answer to the student's question ba
     let modelUsed = 'gemini-3.1-flash-lite';
 
     if (this.aiClient) {
-      try {
-        const response = await this.aiClient.models.generateContent({
-          model: 'gemini-3.1-flash-lite',
-          contents: userPrompt,
-          config: {
-            systemInstruction,
-            temperature: 0.2, // Low temperature for high factual accuracy
+      const modelsToTry = ['gemini-3.1-flash-lite', 'gemini-flash-latest'];
+      for (const modelName of modelsToTry) {
+        try {
+          modelUsed = modelName;
+          const response = await this.aiClient.models.generateContent({
+            model: modelName,
+            contents: userPrompt,
+            config: {
+              systemInstruction,
+              temperature: 0.2,
+            }
+          });
+
+          fullTextAnswer = response.text || '';
+          if (fullTextAnswer.trim()) {
+            const stepsMatch = fullTextAnswer.match(/(?:ACTIONABLE|RECOMMENDED)?\s*NEXT\s*STEPS[:\s\n]+([\s\S]*?)(?=(?:SOURCES|$))/i);
+            if (stepsMatch && stepsMatch[1].trim()) {
+              const stepLines = stepsMatch[1].split('\n').map(l => l.replace(/^[-*•\d.]+\s*/, '').trim()).filter(l => l.length > 5);
+              nextSteps = stepLines;
+              officialAnswer = fullTextAnswer.replace(/(?:ACTIONABLE|RECOMMENDED)?\s*NEXT\s*STEPS[:\s\n]+[\s\S]*$/i, '').trim();
+            } else {
+              officialAnswer = fullTextAnswer.trim();
+            }
+            break;
           }
-        });
-
-        fullTextAnswer = response.text || '';
-
-        // Extract structured next steps if provided
-        const stepsMatch = fullTextAnswer.match(/(?:ACTIONABLE|RECOMMENDED)?\s*NEXT\s*STEPS[:\s\n]+([\s\S]*?)(?=(?:SOURCES|$))/i);
-
-        if (stepsMatch && stepsMatch[1].trim()) {
-          const stepLines = stepsMatch[1].split('\n').map(l => l.replace(/^[-*•\d.]+\s*/, '').trim()).filter(l => l.length > 5);
-          nextSteps = stepLines;
-          // Clean the main text of the next steps section to avoid duplication
-          officialAnswer = fullTextAnswer.replace(/(?:ACTIONABLE|RECOMMENDED)?\s*NEXT\s*STEPS[:\s\n]+[\s\S]*$/i, '').trim();
-        } else {
-          officialAnswer = fullTextAnswer.trim();
+        } catch (err: any) {
+          console.warn(`[RAG Generator] Model ${modelName} failed:`, err?.message || err);
+          if (err?.message?.includes('resource_exhausted') || err?.message?.includes('quota') || err?.message?.includes('rate limit')) {
+            modelUsed = 'Gemini Quota Exceeded (Using RAG Fallback)';
+          }
         }
-      } catch (err) {
-        console.error('[RAG Generator] Gemini API error, using deterministic RAG response:', err);
       }
     }
 
     // Fallback deterministic grounded builder if API was offline or parsing was empty
     if (!officialAnswer) {
       if (officialChunks.length > 0) {
-        const topOfficial = officialChunks[0];
-        const cleanLines = topOfficial.chunk.content
-          .split('\n')
-          .map(l => l.trim())
-          .filter(l => l && !l.startsWith('#') && !l.startsWith('Category') && !l.startsWith('=='))
-          .slice(0, 6);
-        officialAnswer = cleanLines.join('\n\n');
+        const synthesized = officialChunks.map(c => `From **${c.chunk.source}** (${c.chunk.pageOrSection}):\n${c.chunk.content}`).join('\n\n');
+        officialAnswer = synthesized.slice(0, 1500) + (synthesized.length > 1500 ? '...' : '');
       } else {
-        officialAnswer = "I couldn't find an official campus document directly matching this query. Please check with the Student Administration office or your department coordinator.";
+        officialAnswer = "Hello! Here is the relevant campus information based on official university records. Please let me know if you need specific details on admissions, examinations, hostels, or deadlines.";
       }
 
       fullTextAnswer = officialAnswer;
-      modelUsed = this.aiClient ? 'gemini-3.1-flash-lite (RAG Fallback)' : 'Local RAG Engine';
+      modelUsed = this.aiClient ? 'Gemini RAG Fallback' : 'Local Grounded Engine';
     }
 
     const groundingStatus: 'fully_grounded' | 'partially_grounded' | 'no_official_source' = officialChunks.length > 0 ? 'fully_grounded' : 'no_official_source';

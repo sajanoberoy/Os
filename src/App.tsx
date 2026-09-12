@@ -111,7 +111,7 @@ export default function App() {
     return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
   }
 
-  if (user.role === 'admin' && currentView === 'admin') {
+  if ((user.role === 'admin' || user.role === 'editor') && currentView === 'admin') {
     return (
       <AdminPanel
         token={token}
@@ -127,7 +127,7 @@ export default function App() {
       token={token}
       user={user}
       onLogout={handleLogout}
-      onSwitchToAdmin={user.role === 'admin' ? () => setCurrentView('admin') : undefined}
+      onSwitchToAdmin={user.role === 'admin' || user.role === 'editor' ? () => setCurrentView('admin') : undefined}
     />
   );
 }

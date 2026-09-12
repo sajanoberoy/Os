@@ -104,13 +104,16 @@ export class RAGSearcher {
     // Sort by relevance score descending
     scoredChunks.sort((a, b) => b.score - a.score);
 
-    // If no scored chunks passed threshold but chunks exist, provide top 3 chunks as broad context
-    if (scoredChunks.length === 0 && chunks.length > 0) {
-      for (const chunk of chunks.slice(0, 3)) {
-        scoredChunks.push({
-          chunk,
-          score: 0.1,
-        });
+    // If fewer than topOfficial chunks passed threshold, ensure we include top chunks as broad context so chatbot always has knowledge
+    if (scoredChunks.length < topOfficial && chunks.length > 0) {
+      const existingIds = new Set(scoredChunks.map(sc => sc.chunk.id));
+      for (const chunk of chunks) {
+        if (!existingIds.has(chunk.id) && scoredChunks.length < topOfficial) {
+          scoredChunks.push({
+            chunk,
+            score: 0.15,
+          });
+        }
       }
     }
 

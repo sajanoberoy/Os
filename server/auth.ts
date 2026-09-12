@@ -117,7 +117,7 @@ async function sendVerificationEmail(email: string, code: string) {
 export interface UserSession {
   userId: string;
   email: string;
-  role: 'student' | 'demo' | 'admin';
+  role: 'student' | 'demo' | 'admin' | 'editor';
   name: string;
   token: string;
   createdAt: number;
@@ -239,23 +239,126 @@ export async function authenticateUser(email: string, password: string): Promise
   }
 }
 
-export async function logUserActivity(userId: string, ipAddress: string, userAgent: string, askedQuestion: boolean = false) {
+export async function logUserActivity(userId: string, ipAddress: string, userAgent: string, askedQuestion: boolean = false): Promise<{ allowed: boolean; error?: string }> {
   try {
     const userRef = doc(db, 'users', userId);
     const uSnap = await getDoc(userRef);
+    let userData: any = null;
     if (uSnap.exists()) {
-      const updates: any = {
-        lastActive: new Date().toISOString(),
-        ipAddress,
-        userAgent
-      };
-      if (askedQuestion) {
-        updates.questionsCount = (uSnap.data().questionsCount || 0) + 1;
+      userData = uSnap.data();
+    } else {
+      const local = readLocalUsersBackup();
+      if (local[userId]) {
+        userData = local[userId];
       }
-      await updateDoc(userRef, updates);
     }
-  } catch (err) {
-    // Non-fatal activity log failure
+
+    if (!userData) {
+      return { allowed: true };
+    }
+
+    // Admins and editors have unlimited queries
+    if (userData.role === 'admin' || userData.role === 'editor') {
+      return { allowed: true };
+    }
+
+    const todayStr = new Date().toDateString();
+    let todayCount = userData.todayQuestionCount || 0;
+    const lastDate = userData.lastQueryDate || '';
+    const dailyLimit = userData.dailyLimit !== undefined ? userData.dailyLimit : 50;
+
+    if (lastDate !== todayStr) {
+      todayCount = 0;
+    }
+
+    if (askedQuestion && todayCount >= dailyLimit) {
+      return {
+        allowed: false,
+        error: `Daily question limit reached (${dailyLimit} questions/day). Please try again tomorrow or ask your administrator to increase your limit.`
+      };
+    }
+
+    const updates: any = {
+      lastActive: new Date().toISOString(),
+      ipAddress,
+      userAgent,
+      lastQueryDate: todayStr,
+      todayQuestionCount: todayCount,
+    };
+
+    if (askedQuestion) {
+      updates.todayQuestionCount = todayCount + 1;
+      updates.questionsCount = (userData.questionsCount || 0) + 1;
+    }
+
+    try {
+      await updateDoc(userRef, updates);
+    } catch (e) {}
+
+    const local = readLocalUsersBackup();
+    if (local[userId]) {
+      local[userId] = { ...local[userId], ...updates };
+      writeLocalUsersBackup(local);
+    }
+
+    return { allowed: true };
+  } catch (err: any) {
+    console.error('[Auth] logUserActivity error:', err);
+    return { allowed: true };
+  }
+}
+
+export async function adminCreateUser(name: string, email: string, password: string, role: string = 'student', dailyLimit: number = 50): Promise<{ success: boolean; error?: string; userId?: string }> {
+  const normalizedEmail = email.trim().toLowerCase();
+  try {
+    let exists = false;
+    try {
+      const usersSnap = await getDocs(collection(db, 'users'));
+      usersSnap.forEach(d => {
+        if (d.data().email === normalizedEmail) exists = true;
+      });
+    } catch (e) {
+      const local = readLocalUsersBackup();
+      if (Object.values(local).some((u: any) => u.email === normalizedEmail)) {
+        exists = true;
+      }
+    }
+
+    if (exists) {
+      return { success: false, error: 'User with this email already exists.' };
+    }
+
+    const id = `usr_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+    const passwordHash = hashPassword(password);
+
+    const userData = {
+      id,
+      email: normalizedEmail,
+      passwordHash,
+      name,
+      role: ['admin', 'editor', 'student'].includes(role) ? role : 'student',
+      verified: true,
+      dailyLimit: parseInt(String(dailyLimit)) || 50,
+      todayQuestionCount: 0,
+      lastQueryDate: new Date().toDateString(),
+      createdAt: new Date().toISOString(),
+      lastActive: new Date().toISOString(),
+      ipAddress: 'Admin Created',
+      userAgent: 'Admin Panel',
+      questionsCount: 0
+    };
+
+    try {
+      await setDoc(doc(db, 'users', id), userData);
+    } catch (e) {}
+
+    const local = readLocalUsersBackup();
+    local[id] = userData;
+    writeLocalUsersBackup(local);
+
+    return { success: true, userId: id };
+  } catch (err: any) {
+    return { success: false, error: err.message };
   }
 }
 
@@ -436,5 +539,132 @@ export function destroySession(token?: string): boolean {
     delete local[token];
     writeLocalSessionsBackup(local);
   }
+  return true;
+}
+
+// In-memory step-up tokens store: token -> { userId, expiresAt }
+const stepUpTokens = new Map<string, { userId: string; expiresAt: number }>();
+
+export async function requestMasterPinReset(userId: string): Promise<{ success: boolean; emailSent?: boolean; verificationCode?: string; error?: string }> {
+  try {
+    let userDoc: any = null;
+    try {
+      const snap = await getDoc(doc(db, 'users', userId));
+      if (snap.exists()) userDoc = snap.data();
+    } catch (e) {}
+
+    const local = readLocalUsersBackup();
+    if (!userDoc && local[userId]) {
+      userDoc = local[userId];
+    }
+
+    if (!userDoc) return { success: false, error: 'User not found' };
+
+    const emailCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000;
+
+    userDoc.pinResetCode = emailCode;
+    userDoc.pinResetExpires = expiresAt;
+
+    try {
+      await updateDoc(doc(db, 'users', userId), { pinResetCode: emailCode, pinResetExpires: expiresAt });
+    } catch (e) {}
+    local[userId] = userDoc;
+    writeLocalUsersBackup(local);
+
+    const emailSent = await sendVerificationEmail(userDoc.email, emailCode);
+    return { success: true, emailSent, verificationCode: !emailSent ? emailCode : undefined };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function setMasterPin(userId: string, emailCode: string, pin: string): Promise<{ success: boolean; error?: string }> {
+  if (!/^\d{6}$/.test(pin)) {
+    return { success: false, error: 'Master PIN must be exactly 6 digits.' };
+  }
+
+  try {
+    let userDoc: any = null;
+    try {
+      const snap = await getDoc(doc(db, 'users', userId));
+      if (snap.exists()) userDoc = snap.data();
+    } catch (e) {}
+
+    const local = readLocalUsersBackup();
+    if (!userDoc && local[userId]) {
+      userDoc = local[userId];
+    }
+
+    if (!userDoc) return { success: false, error: 'User not found' };
+
+    if (!userDoc.pinResetCode || userDoc.pinResetCode !== emailCode) {
+      return { success: false, error: 'Invalid verification code.' };
+    }
+
+    if (Date.now() > (userDoc.pinResetExpires || 0)) {
+      return { success: false, error: 'Verification code has expired.' };
+    }
+
+    const masterPinHash = hashPassword(pin);
+    userDoc.masterPinHash = masterPinHash;
+    userDoc.pinResetCode = null;
+    userDoc.pinResetExpires = null;
+
+    try {
+      await updateDoc(doc(db, 'users', userId), { masterPinHash, pinResetCode: null, pinResetExpires: null });
+    } catch (e) {}
+    local[userId] = userDoc;
+    writeLocalUsersBackup(local);
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function verifyMasterPinAndIssueToken(userId: string, pin: string): Promise<{ success: boolean; stepUpToken?: string; error?: string }> {
+  try {
+    let userDoc: any = null;
+    try {
+      const snap = await getDoc(doc(db, 'users', userId));
+      if (snap.exists()) userDoc = snap.data();
+    } catch (e) {}
+
+    const local = readLocalUsersBackup();
+    if (!userDoc && local[userId]) {
+      userDoc = local[userId];
+    }
+
+    if (!userDoc) return { success: false, error: 'User not found' };
+
+    if (!userDoc.masterPinHash) {
+      return { success: false, error: 'Master PIN is not set up. Please set your 6-digit Master PIN in settings first.' };
+    }
+
+    const inputHash = hashPassword(pin);
+    if (inputHash !== userDoc.masterPinHash) {
+      return { success: false, error: 'Incorrect 6-digit Master PIN.' };
+    }
+
+    const stepUpToken = `stepup_${crypto.randomBytes(24).toString('hex')}`;
+    stepUpTokens.set(stepUpToken, { userId, expiresAt: Date.now() + 2 * 60 * 1000 }); // Valid for 2 mins
+
+    return { success: true, stepUpToken };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export function validateStepUpToken(userId: string, token?: string): boolean {
+  if (!token) return false;
+  const data = stepUpTokens.get(token);
+  if (!data) return false;
+  if (data.userId !== userId || Date.now() > data.expiresAt) {
+    stepUpTokens.delete(token);
+    return false;
+  }
+  // Single-use token
+  stepUpTokens.delete(token);
   return true;
 }

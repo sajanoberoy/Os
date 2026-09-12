@@ -38,6 +38,46 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ token, user, onLogout, o
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSource, setSelectedSource] = useState<SourceCitation | null>(null);
 
+  // Automatically load last 5 past chats (question + answer) into chat stream on mount (ChatGPT style)
+  useEffect(() => {
+    const loadChatHistoryIntoStream = async () => {
+      try {
+        const res = await fetch('/api/chat/history', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success && data.history && data.history.length > 0) {
+          const historicalMessages: ChatMessage[] = [];
+          // data.history is newest first, reverse to display chronologically (oldest to newest)
+          const reversed = [...data.history].reverse();
+          reversed.forEach((item, idx) => {
+            historicalMessages.push({
+              id: `hist-user-${idx}`,
+              sender: 'user',
+              text: item.question,
+              timestamp: new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            });
+            historicalMessages.push({
+              id: `hist-ai-${idx}`,
+              sender: 'ai',
+              text: item.answer,
+              timestamp: new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            });
+          });
+
+          setMessages(prev => [
+            prev[0], // Keep welcome message at the top
+            ...historicalMessages
+          ]);
+        }
+      } catch (err) {
+        console.error('Failed to load chat history into stream', err);
+      }
+    };
+
+    loadChatHistoryIntoStream();
+  }, [token]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -147,16 +187,16 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({ token, user, onLogout, o
 
         {/* Right Action Tools & User Profile */}
         <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Admin Switch Button if admin */}
-          {user.role === 'admin' && onSwitchToAdmin && (
+          {/* Admin/Editor Switch Button */}
+          {(user.role === 'admin' || user.role === 'editor') && onSwitchToAdmin && (
             <button
               onClick={onSwitchToAdmin}
               className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-xs"
               title="Open Source Documents Manager"
             >
               <Shield className="w-3.5 h-3.5 text-blue-400" />
-              <span className="hidden sm:inline">Admin Panel</span>
-              <span className="sm:hidden">Admin</span>
+              <span className="hidden sm:inline">{user.role === 'editor' ? 'Editor Console' : 'Admin Panel'}</span>
+              <span className="sm:hidden">Console</span>
             </button>
           )}
 

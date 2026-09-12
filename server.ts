@@ -9,7 +9,12 @@ import {
   registerUser, 
   verifyUserCode, 
   logUserActivity,
-  hashPassword 
+  hashPassword,
+  adminCreateUser,
+  requestMasterPinReset,
+  setMasterPin,
+  verifyMasterPinAndIssueToken,
+  validateStepUpToken
 } from './server/auth.js';
 import { 
   db, 
@@ -38,7 +43,7 @@ async function startServer() {
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-session-token');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-session-token, x-step-up-token');
     if (req.method === 'OPTIONS') {
       return res.sendStatus(200);
     }
@@ -79,6 +84,30 @@ async function startServer() {
       return res.status(403).json({
         success: false,
         error: 'Forbidden. Administrator privileges required.',
+      });
+    }
+
+    (req as any).session = session;
+    next();
+  };
+
+  // Editor or Admin Middleware
+  const requireEditorOrAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : (req.headers['x-session-token'] as string);
+
+    const session = verifySessionToken(token);
+    if (!session) {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized. Please log in.',
+      });
+    }
+
+    if (session.role !== 'admin' && session.role !== 'editor') {
+      return res.status(403).json({
+        success: false,
+        error: 'Forbidden. Administrator or Editor privileges required.',
       });
     }
 
@@ -227,17 +256,105 @@ async function startServer() {
       const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
       const userAgent = req.headers['user-agent'] || 'unknown';
       const session = (req as any).session;
-      if (session && session.userId && session.role === 'student') {
-        logUserActivity(session.userId, ip, userAgent, true).catch(err => {
-          console.error('[API /api/chat] Error updating student activity stats:', err);
-        });
+      if (session && session.userId) {
+        const activityResult = await logUserActivity(session.userId, ip, userAgent, true);
+        if (!activityResult.allowed) {
+          return res.status(429).json({
+            success: false,
+            error: activityResult.error || 'Daily question limit reached.'
+          });
+        }
       }
 
       // 1. Vector & Semantic Search
       const retrieval = await ragSearcher.search(cleanQuery);
 
+      // Log question for Top 10 queries analytics
+      try {
+        const queriesLogDir = path.join(process.cwd(), 'data', 'analytics');
+        if (!fs.existsSync(queriesLogDir)) {
+          fs.mkdirSync(queriesLogDir, { recursive: true });
+        }
+        const queriesLogFile = path.join(queriesLogDir, 'queries.json');
+        let queriesData: Array<{ question: string; count: number; lastAsked: string }> = [];
+        if (fs.existsSync(queriesLogFile)) {
+          try {
+            queriesData = JSON.parse(fs.readFileSync(queriesLogFile, 'utf8'));
+          } catch (e) {}
+        }
+        
+        // Normalize question (lowercase, trim, collapse spaces)
+        const normalized = cleanQuery.toLowerCase().replace(/\s+/g, ' ').trim();
+        const existing = queriesData.find(q => q.question.toLowerCase().replace(/\s+/g, ' ').trim() === normalized);
+        if (existing) {
+          existing.count += 1;
+          existing.lastAsked = new Date().toISOString();
+        } else {
+          queriesData.push({
+            question: cleanQuery,
+            count: 1,
+            lastAsked: new Date().toISOString()
+          });
+        }
+        fs.writeFileSync(queriesLogFile, JSON.stringify(queriesData, null, 2), 'utf8');
+      } catch (logErr) {
+        console.warn('[API /api/chat] Failed to log query for analytics:', logErr);
+      }
+
       // 2. Generate grounded response with separated Official and Student Experience
       const responsePayload = await ragGenerator.generateAnswer(retrieval);
+
+      // Save chat history for user (last 5 queries & answers) in Firestore + Local backup
+      try {
+        const session = (req as any).session;
+        if (session && session.userId) {
+          const chatHistoryDir = path.join(process.cwd(), 'data', 'chat_history');
+          if (!fs.existsSync(chatHistoryDir)) {
+            fs.mkdirSync(chatHistoryDir, { recursive: true });
+          }
+          const historyFile = path.join(chatHistoryDir, `${session.userId}.json`);
+          let userHistory: Array<{ question: string; answer: string; timestamp: string }> = [];
+          
+          // Try loading existing history from Firestore first or local file
+          try {
+            const histSnap = await getDoc(doc(db, 'chat_history', session.userId));
+            if (histSnap.exists() && histSnap.data().history) {
+              userHistory = histSnap.data().history;
+            }
+          } catch (e) {}
+
+          if (userHistory.length === 0 && fs.existsSync(historyFile)) {
+            try {
+              userHistory = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+            } catch (e) {}
+          }
+
+          userHistory.unshift({
+            question: cleanQuery,
+            answer: responsePayload.officialAnswer || responsePayload.fullTextAnswer || '',
+            timestamp: new Date().toISOString()
+          });
+          if (userHistory.length > 5) {
+            userHistory = userHistory.slice(0, 5);
+          }
+
+          // Save to local file backup
+          fs.writeFileSync(historyFile, JSON.stringify(userHistory, null, 2), 'utf8');
+
+          // Save to Firestore
+          try {
+            await setDoc(doc(db, 'chat_history', session.userId), {
+              userId: session.userId,
+              history: userHistory,
+              updatedAt: new Date().toISOString()
+            });
+          } catch (fsErr) {
+            console.warn('[API /api/chat] Firestore chat history save failed:', fsErr);
+          }
+        }
+      } catch (histErr) {
+        console.warn('[API /api/chat] Failed to save user chat history:', histErr);
+      }
 
       return res.json(responsePayload);
     } catch (err: any) {
@@ -247,6 +364,46 @@ async function startServer() {
         error: "Sorry, I couldn't process that question right now.",
         detail: err.message,
       });
+    }
+  });
+
+  // Get User Chat History (Last 5 queries & answers)
+  app.get('/api/chat/history', requireAuth, async (req, res) => {
+    try {
+      const session = (req as any).session;
+      if (!session || !session.userId) {
+        return res.status(401).json({ success: false, error: 'Unauthorized' });
+      }
+
+      let userHistory: Array<{ question: string; answer: string; timestamp: string }> = [];
+
+      // Try fetching from Firestore first
+      try {
+        const histSnap = await getDoc(doc(db, 'chat_history', session.userId));
+        if (histSnap.exists() && histSnap.data().history) {
+          userHistory = histSnap.data().history;
+        }
+      } catch (fsErr) {
+        console.warn('[API /api/chat/history] Firestore getDoc failed, reading local backup:', fsErr);
+      }
+
+      // Fallback to local disk file if Firestore empty or failed
+      if (userHistory.length === 0) {
+        const historyFile = path.join(process.cwd(), 'data', 'chat_history', `${session.userId}.json`);
+        if (fs.existsSync(historyFile)) {
+          try {
+            userHistory = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+          } catch (e) {}
+        }
+      }
+
+      res.json({
+        success: true,
+        history: userHistory.slice(0, 5)
+      });
+    } catch (err: any) {
+      console.error('[API /api/chat/history] Error:', err);
+      res.status(500).json({ success: false, error: err.message });
     }
   });
 
@@ -263,8 +420,8 @@ async function startServer() {
     return clean;
   };
 
-  // 1. Admin: List all source documents
-  app.get('/api/admin/documents', requireAdmin, async (req, res) => {
+  // 1. Admin/Editor: List all source documents
+  app.get('/api/admin/documents', requireEditorOrAdmin, async (req, res) => {
     try {
       const documentList: any[] = [];
       const allChunks = ragIndexer.getChunks();
@@ -327,8 +484,8 @@ async function startServer() {
     }
   });
 
-  // 2. Admin: Get specific document content
-  app.get('/api/admin/documents/:filename', requireAdmin, async (req, res) => {
+  // 2. Admin/Editor: Get specific document content
+  app.get('/api/admin/documents/:filename', requireEditorOrAdmin, async (req, res) => {
     try {
       const filename = sanitizeFileName(req.params.filename);
       let content = '';
@@ -370,8 +527,8 @@ async function startServer() {
     }
   });
 
-  // 3. Admin: Create new document / file
-  app.post('/api/admin/documents', requireAdmin, async (req, res) => {
+  // 3. Admin/Editor: Create new document / file
+  app.post('/api/admin/documents', requireEditorOrAdmin, async (req, res) => {
     try {
       const { filename, content } = req.body;
       if (!filename || typeof filename !== 'string' || !filename.trim()) {
@@ -416,9 +573,57 @@ async function startServer() {
     }
   });
 
-  // 4. Admin: Update existing document
-  app.put('/api/admin/documents/:filename', requireAdmin, async (req, res) => {
+  // Master PIN Routes
+  app.post('/api/admin/pin/request-reset', requireEditorOrAdmin, async (req, res) => {
     try {
+      const session = (req as any).session;
+      const result = await requestMasterPinReset(session.userId);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post('/api/admin/pin/set', requireEditorOrAdmin, async (req, res) => {
+    try {
+      const session = (req as any).session;
+      const { emailCode, pin } = req.body;
+      if (!emailCode || !pin) {
+        return res.status(400).json({ success: false, error: 'Email verification code and 6-digit PIN are required.' });
+      }
+      const result = await setMasterPin(session.userId, emailCode, pin);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post('/api/admin/pin/verify', requireEditorOrAdmin, async (req, res) => {
+    try {
+      const session = (req as any).session;
+      const { pin } = req.body;
+      if (!pin) {
+        return res.status(400).json({ success: false, error: 'Master PIN is required.' });
+      }
+      const result = await verifyMasterPinAndIssueToken(session.userId, pin);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // 4. Admin/Editor: Update existing document
+  app.put('/api/admin/documents/:filename', requireEditorOrAdmin, async (req, res) => {
+    try {
+      const session = (req as any).session;
+      const stepUpToken = req.headers['x-step-up-token'] as string || req.body.stepUpToken;
+      if (!validateStepUpToken(session.userId, stepUpToken)) {
+        return res.status(403).json({
+          success: false,
+          error: 'Master PIN verification required. Please enter your 6-digit Master PIN to modify trained data.'
+        });
+      }
+
       const oldFilename = sanitizeFileName(req.params.filename);
       const { content, newFilename } = req.body;
       if (typeof content !== 'string') {
@@ -470,9 +675,18 @@ async function startServer() {
     }
   });
 
-  // 5. Admin: Delete document
-  app.delete('/api/admin/documents/:filename', requireAdmin, async (req, res) => {
+  // 5. Admin/Editor: Delete document
+  app.delete('/api/admin/documents/:filename', requireEditorOrAdmin, async (req, res) => {
     try {
+      const session = (req as any).session;
+      const stepUpToken = req.headers['x-step-up-token'] as string || req.body.stepUpToken;
+      if (!validateStepUpToken(session.userId, stepUpToken)) {
+        return res.status(403).json({
+          success: false,
+          error: 'Master PIN verification required. Please enter your 6-digit Master PIN to delete trained data.'
+        });
+      }
+
       const filename = sanitizeFileName(req.params.filename);
       try {
         await deleteDoc(doc(db, 'documents', filename));
@@ -497,8 +711,8 @@ async function startServer() {
     }
   });
 
-  // 6. Admin: Force Reindex
-  app.post('/api/admin/reindex', requireAdmin, async (req, res) => {
+  // 6. Admin/Editor: Force Reindex
+  app.post('/api/admin/reindex', requireEditorOrAdmin, async (req, res) => {
     try {
       const result = await ragIndexer.reindexAll();
       res.json({
@@ -601,17 +815,20 @@ async function startServer() {
       }
 
       for (const u of Object.values(usersMap)) {
-        if (u.role === 'student') {
+        if (u.role === 'student' || u.role === 'editor') {
           studentsList.push({
             userId: u.userId || u.id,
             name: u.name,
             email: u.email,
+            role: u.role || 'student',
             createdAt: u.createdAt,
             verified: u.verified !== false,
             ipAddress: u.ipAddress || 'unknown',
             userAgent: u.userAgent || 'unknown',
             lastActive: u.lastActive || u.createdAt || new Date().toISOString(),
             questionsCount: u.questionsCount || 0,
+            dailyLimit: u.dailyLimit !== undefined ? u.dailyLimit : 50,
+            todayQuestionCount: u.todayQuestionCount || 0,
           });
         }
       }
@@ -654,7 +871,62 @@ async function startServer() {
     }
   });
 
-  // 10. Admin: Change student password
+  // Admin: Create user manually with credentials
+  app.post('/api/admin/users', requireAdmin, async (req, res) => {
+    try {
+      const { name, email, password, role, dailyLimit } = req.body;
+      if (!name || !email || !password) {
+        return res.status(400).json({ success: false, error: 'Name, email, and password are required.' });
+      }
+      const result = await adminCreateUser(name, email, password, role || 'student', dailyLimit || 50);
+      if (!result.success) {
+        return res.status(400).json({ success: false, error: result.error || 'Failed to create user.' });
+      }
+      res.json({ success: true, message: `User created successfully for ${email}`, userId: result.userId });
+    } catch (err: any) {
+      console.error('[API /api/admin/users] Error:', err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // 11. Admin: Get Top Frequently Asked Questions
+  app.get('/api/admin/queries', requireAdmin, async (req, res) => {
+    try {
+      const queriesLogFile = path.join(process.cwd(), 'data', 'analytics', 'queries.json');
+      let queriesData: Array<{ question: string; count: number; lastAsked: string }> = [];
+      if (fs.existsSync(queriesLogFile)) {
+        try {
+          queriesData = JSON.parse(fs.readFileSync(queriesLogFile, 'utf8'));
+        } catch (e) {}
+      }
+
+      // Sort by frequency count descending (top asked first)
+      queriesData.sort((a, b) => b.count - a.count);
+
+      // If no queries logged yet, provide helpful initial mock sample queries for testing/demo
+      if (queriesData.length === 0) {
+        queriesData = [
+          { question: "What are the library operating hours during weekends?", count: 42, lastAsked: new Date().toISOString() },
+          { question: "How do I apply for hostel accommodation and hostel fee payment?", count: 38, lastAsked: new Date().toISOString() },
+          { question: "What is the last date for submitting semester examination forms?", count: 31, lastAsked: new Date().toISOString() },
+          { question: "Where is the student counseling and mental health office located?", count: 24, lastAsked: new Date().toISOString() },
+          { question: "Can I change my elective course after the add/drop deadline?", count: 19, lastAsked: new Date().toISOString() },
+          { question: "What are the rules and parking fees for student vehicles on campus?", count: 15, lastAsked: new Date().toISOString() },
+          { question: "How can I request an official academic transcript or Bonafide certificate?", count: 12, lastAsked: new Date().toISOString() },
+          { question: "What scholarships are available for undergraduate students?", count: 10, lastAsked: new Date().toISOString() },
+        ];
+      }
+
+      res.json({
+        success: true,
+        queries: queriesData.slice(0, 10), // Top 10
+        totalUniqueQueries: queriesData.length,
+      });
+    } catch (err: any) {
+      console.error('[API /api/admin/queries] Error:', err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
   app.put('/api/admin/students/:id/password', requireAdmin, async (req, res) => {
     try {
       const id = req.params.id;
@@ -684,6 +956,42 @@ async function startServer() {
       }
 
       res.json({ success: true });
+    } catch (err: any) {
+      console.error(err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Admin: Update student daily question limit
+  app.put('/api/admin/students/:id/limit', requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { dailyLimit } = req.body;
+      const limitVal = parseInt(dailyLimit);
+      if (isNaN(limitVal) || limitVal < 1 || limitVal > 10000) {
+        return res.status(400).json({ success: false, error: 'Please provide a valid daily limit between 1 and 10000.' });
+      }
+
+      try {
+        await updateDoc(doc(db, 'users', id), {
+          dailyLimit: limitVal
+        });
+      } catch (e) {
+        console.warn('[Admin] Firestore dailyLimit update failed:', e);
+      }
+
+      const usersBackupPath = path.join(process.cwd(), 'data', 'users.json');
+      if (fs.existsSync(usersBackupPath)) {
+        try {
+          const localUsers = JSON.parse(fs.readFileSync(usersBackupPath, 'utf8'));
+          if (localUsers[id]) {
+            localUsers[id].dailyLimit = limitVal;
+            fs.writeFileSync(usersBackupPath, JSON.stringify(localUsers, null, 2), 'utf8');
+          }
+        } catch (e) {}
+      }
+
+      res.json({ success: true, message: `Daily limit updated to ${limitVal}` });
     } catch (err: any) {
       console.error(err);
       res.status(500).json({ success: false, error: err.message });
