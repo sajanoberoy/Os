@@ -7,6 +7,12 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if true;
     }
+    match /chat_history/{chatId} {
+      allow read, write: if true;
+    }
+    match /analytics/{analyticsId} {
+      allow read, write: if true;
+    }
     match /test/{testId} {
       allow read, write: if true;
     }
